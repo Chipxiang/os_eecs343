@@ -70,6 +70,24 @@ found:
 
   return p;
 }
+// Look in the process table to find states other than UNUSED
+// Count the total amount of such process
+// If cannot be complete, return -1
+int
+getprocs(void)
+{
+  struct proc *p;
+  int procCount; 
+
+  procCount = 0;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == UNUSED)
+      procCount = procCount + 1;
+  }
+  release(&ptable.lock);
+  return procCount;
+}   
 
 // Set up first user process.
 void

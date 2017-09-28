@@ -1,6 +1,7 @@
 #include "types.h"
 #include "user.h"
 #include "proc.c"
+#include "ProcessInfo.h"
 
 int
 main(int argc, char *argv[])

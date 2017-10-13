@@ -5,6 +5,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "ProcessInfo.h"
 
 struct {
   struct spinlock lock;
@@ -69,6 +70,26 @@ found:
   p->context->eip = (uint)forkret;
 
   return p;
+}
+
+int
+getprocs(struct ProcessInfo processInfoTable[NPROC])
+{
+  int i = 0;
+  acquire(&ptable.lock);
+  struct proc *p;
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == UNUSED) continue;
+    processInfoTable[i].pid = p->pid;
+    processInfoTable[i].ppid = p->parent->pid;
+    processInfoTable[i].state = p->state;
+    processInfoTable[i].sz = p->sz;
+    safestrcpy(processInfoTable[i].name, p->name, 16);
+    i++;
+  }
+  release(&ptable.lock);
+  return i;
 }
 
 // Set up first user process.

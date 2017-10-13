@@ -1,6 +1,9 @@
 #ifndef _DEFS_H_
 #define _DEFS_H_
 
+//#include "parameter.h"
+//#include "ProcessInfo.h"
+
 struct buf;
 struct context;
 struct file;
@@ -9,6 +12,7 @@ struct pipe;
 struct proc;
 struct spinlock;
 struct stat;
+struct ProcessInfo;
 
 // bio.c
 void            binit(void);
@@ -98,6 +102,7 @@ int             pipewrite(struct pipe*, char*, int);
 struct proc*    copyproc(struct proc*);
 void            exit(void);
 int             fork(void);
+int 			getprocs(struct ProcessInfo*);
 int             growproc(int);
 int             kill(int);
 void            pinit(void);

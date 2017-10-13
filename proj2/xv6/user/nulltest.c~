@@ -1,0 +1,7 @@
+#include "types.h"
+#include "user.h"
+#include "param.h"
+#include "ProcessInfo.h"
+void nulltest(){
+  printf(1, "Test");
+}

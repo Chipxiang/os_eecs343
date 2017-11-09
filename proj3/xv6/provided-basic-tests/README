@@ -1,0 +1,44 @@
+TO RUN THE TESTS:
+
+* Copy the entire provided-basic-tests directory to a lab machine.
+
+* Navigate to the base directory of your xv6 code.
+
+* From that directory, execute the runtests executable, which is in 
+  the provided-basic-tests/tests/ directory.
+  Run the executable using a command likea this:
+  /path/to/provided-basic-tests/tests/runtests-proj3
+
+* The individual tests are available within the ctests/ folder. You 
+  can copy the file you want into a user program and run it 
+  locally in xv6 as you wish.
+
+* The output from runtests will indicate which tests you have passed 
+  and which you failed (if any).  The output will be saved in 
+  runtests.log
+
+For more options available while testing, run the executable with 
+the '-h' flag.
+
+
+
+TO ADD YOUR OWN TESTS:
+
+* Write your test code and save it in the 
+  provided-basic-tests/tests/ctests/proj3 directory.
+  You may want to copy and paste one of the provided tests into a 
+  new file and use that as a basis for writing your new test.
+
+* Each test should be written in its own file.
+
+* Open provided-basic-tests/tests/proj3.py and add your test name to 
+  the list of test_values.  The test name should be the same as the 
+  filename, but without the .c extension.  For example:
+
+  test_values = [
+    {'name': 'clone'},     # Provided. See provided-basic-tests/tests/ctests/proj3/clone.c
+    {'name': 'badclone'},  # Provided. See provided-basic-tests/tests/ctests/proj3/badclone.c
+    {'name': 'join'},      # Provided. See provided-basic-tests/tests/ctests/proj3/join.c
+    {'name': 'my_test'},   # Added. Code in provided-basic-tests/tests/ctests/proj3/my_test.c
+    {'name': 'my_test2'},  # Added. Code in provided-basic-tests/tests/ctests/proj3/my_test2.c
+  ]

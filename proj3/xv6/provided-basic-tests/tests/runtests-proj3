@@ -1,0 +1,4 @@
+#!/bin/bash
+base="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+python $base/proj3.py --test-path $base $@ | tee -i runtests.log
+exit $?

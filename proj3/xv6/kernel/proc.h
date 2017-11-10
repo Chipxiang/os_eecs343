@@ -77,6 +77,7 @@ struct proc {
   void *tstack;
   int *thread_count;
   struct spinlock lock;
+  int ismain;
 };
 
 // Process memory is laid out contiguously, low addresses first:

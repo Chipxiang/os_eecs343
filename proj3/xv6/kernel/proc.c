@@ -304,7 +304,7 @@ join(int pid)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
         if (p->pid == pid){
             for(;;){
-                if (p->pgdir != proc->pgdir || p->parent != proc)
+                if (p->pgdir != proc->pgdir || p->parent != proc || p->ismain == 1)
                     return -1;
                 if(p->state == ZOMBIE){
                     kfree(p->kstack);

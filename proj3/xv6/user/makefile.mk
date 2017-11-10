@@ -18,6 +18,7 @@ USER_PROGS := \
 	wc\
 	zombie\
 	clone\
+	join\
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 

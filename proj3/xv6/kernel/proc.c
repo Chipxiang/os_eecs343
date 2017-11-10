@@ -68,7 +68,7 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
-  initlock(&(p->lock), "process address");
+  initlock(&(p->lock), "process address space");
   p->thread_count = (int*)kalloc();
   *(p->thread_count) = 1;
 
@@ -114,11 +114,15 @@ growproc(int n)
   acquire(&(proc->lock));
   sz = proc->sz;
   if(n > 0){
-    if((sz = allocuvm(proc->pgdir, sz, sz + n)) == 0)
+    if((sz = allocuvm(proc->pgdir, sz, sz + n)) == 0){
+      release(&(proc->lock));
       return -1;
+    }
   } else if(n < 0){
-    if((sz = deallocuvm(proc->pgdir, sz, sz + n)) == 0)
+    if((sz = deallocuvm(proc->pgdir, sz, sz + n)) == 0){
+      release(&(proc->lock));
       return -1;
+    }
   }
   proc->sz = sz;
   release(&(proc->lock));
@@ -146,6 +150,7 @@ fork(void)
     np->state = UNUSED;
     return -1;
   }
+  np->ismain = 1;
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
@@ -182,7 +187,11 @@ clone(void (*fcn)(void*), void *arg, void *stack)
   // Copy process state from p.
   np->pgdir = proc->pgdir;
   np->sz = proc->sz;
-  np->parent = proc;
+  if (proc->ismain == 1)
+    np->parent = proc;
+  else
+    np->parent = proc->parent;
+  np->ismain = 0;
   *np->tf = *proc->tf;
   np->thread_count = proc->thread_count;
   *(np->thread_count) = *(np->thread_count) + 1;
@@ -238,13 +247,23 @@ exit(void)
 
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->parent == proc){
+    if(p->parent == proc && p->ismain == 0){
+        for(fd = 0; fd < NOFILE; fd++){
+            if(p->ofile[fd]){
+                fileclose(p->ofile[fd]);
+                p->ofile[fd] = 0;
+            }
+        }
+        iput(p->cwd);
+        p->cwd = 0;
+        p->state = ZOMBIE;
+    }
+    if(p->parent == proc && p->ismain == 1){
       p->parent = initproc;
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }
   }
-
   // Jump into the scheduler, never to return.
   proc->state = ZOMBIE;
   sched();
@@ -264,7 +283,7 @@ wait(void)
     // Scan through table looking for zombie children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != proc)
+      if(p->parent != proc || p->ismain == 0)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
@@ -323,48 +342,6 @@ join(int pid)
         }
     }
     return -1;
-    /*for(;;){
-        // Scan through table looking for zombie children.
-        havekids = 0;
-        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-            if(p->parent != proc || p->pgdir != proc->pgdir)
-                continue;
-            havekids = 1;
-            if(p->state == ZOMBIE){
-                // Found one.
-                pid = p->pid;
-                kfree(p->kstack);
-                p->kstack = 0;
-                freevm(p->pgdir);
-                p->state = UNUSED;
-                p->pid = 0;
-                p->parent = 0;
-                p->name[0] = 0;
-                p->killed = 0;
-                release(&ptable.lock);
-                return pid;
-            }
-        }
-
-        // No point waiting if we don't have any children.
-        if(!havekids || proc->killed){
-            release(&ptable.lock);
-            return -1;
-        }
-
-        // Wait for children to exit.  (See wakeup1 call in proc_exit.)
-        sleep(proc, &ptable.lock);  //DOC: wait-sleep
-    }
-    struct proc *p;
-    acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-        if(p->pid == pid){
-
-            return 0;
-        }
-    }
-    release(&ptable.lock);
-    return -1;*/
 }
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.

@@ -17,9 +17,10 @@ main(int argc, char* argv[])
  }
 
  int arg = 42;
- int clone_pid = clone(worker, &arg, stack);
+ int clone_pid = clone(DoThreadWork, &arg, stack);
  // main thread continues executing...
  int join_pid = join(clone_pid); // ...but waits for the new thread to complete
+ join_pid = join_pid+0;
  // note that join_pid should equal clone_pid
  printf(1, "global: %d\n", global); // prints "global: 43"
  exit();

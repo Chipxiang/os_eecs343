@@ -28,7 +28,7 @@ main(int argc, char *argv[])
    void *stack = malloc(PGSIZE*2);
    assert(stack != NULL);
    if((uint)stack % PGSIZE)
-     stack = stack + (PGSIZE - (uint)stack % PGSIZE);
+     stack = stack + (PGSIZE - (uint)stack % PGSIZE); //make sure stack argument is page-aligned
 
    int arg = 42;
    int new_thread_pid = clone(worker, &arg, stack);

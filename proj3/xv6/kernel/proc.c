@@ -315,7 +315,7 @@ join(int pid)
                     p->name[0] = 0;
                     p->killed = 0;
                     release(&ptable.lock);
-                    p->thread_count = p->thread_count -1;
+                    *(p->thread_count) = *(p->thread_count) -1;
                     return pid;
                 }
                 sleep(proc, &ptable.lock);

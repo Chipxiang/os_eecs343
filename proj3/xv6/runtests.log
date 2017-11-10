@@ -229,15 +229,15 @@ ld  -m    elf_i386 -nostdlib --omagic \
 dd if=/dev/zero of=xv6.img count=10000
 10000+0 records in
 10000+0 records out
-5120000 bytes (5.1 MB) copied, 0.0135235 s, 379 MB/s
+5120000 bytes (5.1 MB) copied, 0.0132527 s, 386 MB/s
 dd if=kernel/bootblock of=xv6.img conv=notrunc
 1+0 records in
 1+0 records out
-512 bytes (512 B) copied, 8.6629e-05 s, 5.9 MB/s
+512 bytes (512 B) copied, 7.3976e-05 s, 6.9 MB/s
 dd if=kernel/kernel of=xv6.img seek=1 conv=notrunc
 264+1 records in
 264+1 records out
-135326 bytes (135 kB) copied, 0.000294309 s, 460 MB/s
+135326 bytes (135 kB) copied, 0.000312392 s, 433 MB/s
 gcc -c  -iquote include -Wall -Werror -ggdb  -o tools/mkfs.o tools/mkfs.c
 gcc  tools/mkfs.o -o tools/mkfs
 mkdir -p fs
@@ -380,15 +380,154 @@ cpu0: starting
 init: starting sh
 $ tester
 tester
-user/tester.c: 34 assert failed (clone_pid > 0)
-TEST FAILED
+global: 5
+TEST PASSED
 
 
-test clone FAILED
+test clone PASSED
 Description: Call clone and spin until child thread has changed global variable.  Verifies that address space is shared.
- tester failed
 
 Finished running test clone
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Skipped 2 tests.
-To keep testing after failing a test, use flag '-c' or '--continue'
+
+**********************************************************************
+Start running test badclone
+Description: When passing a non page-aligned stack to clone, clone should return -1.
+
+Running xv6 user progam /home/jlj0384/os_eecs343/proj3/xv6/provided-basic-tests/tests/ctests/proj3/badclone.c
+Trying to build project using make
+make
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
+		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+README
+echo
+cat
+clone
+init
+ln
+zombie
+tester
+sh
+grep
+stressfs
+usertests
+rm
+mkdir
+wc
+forktest
+kill
+ls
+balloc: first 444 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/home/software/qemu/bin/qemu-system-i386  -nographic -hdb fs.img xv6.img -smp 2
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+TEST PASSED
+
+
+test badclone PASSED
+Description: When passing a non page-aligned stack to clone, clone should return -1.
+
+Finished running test badclone
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**********************************************************************
+Start running test join
+Description: Call clone to create a new thread.  Call join to wait for that new thread to complete.  join should return the pid of the completed thread and the changes made by the thread should now be seen by the original process.
+
+Running xv6 user progam /home/jlj0384/os_eecs343/proj3/xv6/provided-basic-tests/tests/ctests/proj3/join.c
+Trying to build project using make
+make
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 \
+		-M -MG user/tester.c -MF user/tester.d -MT user/tester.d -MT user/tester.o
+gcc  -I include -nostdinc -Wall -Werror -ggdb -fno-pic -fno-builtin -fno-strict-aliasing -fno-stack-protector -m32 -c -o user/tester.o user/tester.c
+ld  -m    elf_i386 -nostdlib --omagic --entry=main --section-start=.text=0x0 --output=user/bin/tester user/tester.o user/ulib.o user/usys.o user/printf.o user/umalloc.o
+cp user/bin/tester fs/tester
+./tools/mkfs fs.img fs
+used 29 (bit 1 ninode 26) free 29 total 1024
+README
+echo
+cat
+clone
+init
+ln
+zombie
+tester
+sh
+grep
+stressfs
+usertests
+rm
+mkdir
+wc
+forktest
+kill
+ls
+balloc: first 445 blocks have been allocated
+balloc: write bitmap block at sector 28
+rm user/bin/tester
+make qemu-nox 
+Ctrl+a h for help
+/home/software/qemu/bin/qemu-system-i386  -nographic -hdb fs.img xv6.img -smp 2
+WARNING: Image format was not specified for 'fs.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+WARNING: Image format was not specified for 'xv6.img' and probing guessed raw.
+         Automatically detecting the format is dangerous for raw images, write operations on block 0 will be restricted.
+         Specify the 'raw' format explicitly to remove the restrictions.
+xv6...
+lapicinit: 1 0xfee00000
+cpu1: starting
+cpu0: starting
+init: starting sh
+$ tester
+tester
+TEST PASSED
+
+test join PASSED
+Description: Call clone to create a new thread.  Call join to wait for that new thread to complete.  join should return the pid of the completed thread and the changes made by the thread should now be seen by the original process.
+
+Finished running test join
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+**********************************************************************
+**********************************************************************
+**                            SUMMARY                               **
+**********************************************************************
+**********************************************************************
+
+test build PASSED (5 of 5)
+build xv6 using make
+
+test clone PASSED
+Description: Call clone and spin until child thread has changed global variable.  Verifies that address space is shared.
+
+test badclone PASSED
+Description: When passing a non page-aligned stack to clone, clone should return -1.
+
+test join PASSED
+Description: Call clone to create a new thread.  Call join to wait for that new thread to complete.  join should return the pid of the completed thread and the changes made by the thread should now be seen by the original process.
+
+Passed 4 of 4 tests.
+Overall 4 of 4
+Points 5 of 5

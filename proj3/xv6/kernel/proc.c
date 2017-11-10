@@ -121,7 +121,7 @@ growproc(int n)
       return -1;
   }
   proc->sz = sz;
-  release(&(proc->lock))
+  release(&(proc->lock));
   switchuvm(proc);
   return 0;
 }
@@ -168,7 +168,7 @@ fork(void)
 int
 clone(void (*fcn)(void*), void *arg, void *stack)
 {
-  if ((uint)stack % PGSIZE != 0 || (uint)stack + PGSIZE > *(proc->sz)) {
+  if ((uint)stack % PGSIZE != 0 || (uint)stack + PGSIZE > proc->sz) {
     return -1;
   }
 
@@ -293,7 +293,79 @@ wait(void)
     sleep(proc, &ptable.lock);  //DOC: wait-sleep
   }
 }
+int
+join(int pid)
+{
+    if (pid < 0){
+        return -1;
+    }
+    struct proc *p;
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if (p->pid == pid){
+            for(;;){
+                if (p->pgdir != proc->pgdir || p->parent != proc)
+                    return -1;
+                if(p->state == ZOMBIE){
+                    kfree(p->kstack);
+                    p->kstack = 0;
+                    p->state = UNUSED;
+                    p->pid = 0;
+                    p->parent = 0;
+                    p->name[0] = 0;
+                    p->killed = 0;
+                    release(&ptable.lock);
+                    p->thread_count = p->thread_count -1;
+                    return pid;
+                }
+                sleep(proc, &ptable.lock);
+            }
+        }
+    }
+    return -1;
+    /*for(;;){
+        // Scan through table looking for zombie children.
+        havekids = 0;
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+            if(p->parent != proc || p->pgdir != proc->pgdir)
+                continue;
+            havekids = 1;
+            if(p->state == ZOMBIE){
+                // Found one.
+                pid = p->pid;
+                kfree(p->kstack);
+                p->kstack = 0;
+                freevm(p->pgdir);
+                p->state = UNUSED;
+                p->pid = 0;
+                p->parent = 0;
+                p->name[0] = 0;
+                p->killed = 0;
+                release(&ptable.lock);
+                return pid;
+            }
+        }
 
+        // No point waiting if we don't have any children.
+        if(!havekids || proc->killed){
+            release(&ptable.lock);
+            return -1;
+        }
+
+        // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+        sleep(proc, &ptable.lock);  //DOC: wait-sleep
+    }
+    struct proc *p;
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->pid == pid){
+
+            return 0;
+        }
+    }
+    release(&ptable.lock);
+    return -1;*/
+}
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:

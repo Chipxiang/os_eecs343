@@ -94,6 +94,16 @@ sys_clone(void)
 {
     void (*fcn)(void*), *arg, *stack;
     argptr(0, (void*)&fcn, sizeof(void (*)(void*)));
+    argptr(1, (void*)&arg, sizeof(void*));
     argptr(2, (void*)&stack, sizeof(void*));
     return clone(fcn, arg, stack);
+}
+
+int
+sys_join(void)
+{
+    int pid;
+    if(argint(0, &pid) < 0)
+        return -1;
+    return join(pid);
 }

@@ -18,6 +18,7 @@ main(int argc, char* argv[])
 
  void* arg = NULL; // our DoThreadWork function is simple and doesn't need an arg
  int clone_pid = clone(DoThreadWork, arg, stack);
+ clone_pid = clone_pid + 0;
  // the main thread of execution (aka parent process) continues executing here
  while(global != 5) {
  ; // wait for child thread to finish

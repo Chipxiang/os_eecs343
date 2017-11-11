@@ -34,16 +34,3 @@ thread_join(int pid)
   }
   return tid;
 }
-
-void lock_acquire(lock_t* lock){
-  while (xchg(lock, 1) == 1)
-    ; // spin
-}
-
-void lock_release( lock_t *lock) {
-  *lock = 0;
-}
-
-void lock_init(lock_t *lock) {
-  *lock = 0;
-}

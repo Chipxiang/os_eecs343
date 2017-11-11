@@ -71,7 +71,7 @@ found:
   initlock(&(p->lock), "process address space");
   p->thread_count = (int*)kalloc();
   *(p->thread_count) = 1;
-
+  p->ismain = 1;
   return p;
 }
 
@@ -97,7 +97,6 @@ userinit(void)
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
-
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
 
@@ -189,7 +188,7 @@ clone(void (*fcn)(void*), void *arg, void *stack)
   np->sz = proc->sz;
   if (proc->ismain == 1)
     np->parent = proc;
-  else
+  else if (proc->ismain == 0)
     np->parent = proc->parent;
   np->ismain = 0;
   *np->tf = *proc->tf;
@@ -248,15 +247,10 @@ exit(void)
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->parent == proc && p->ismain == 0){
-        for(fd = 0; fd < NOFILE; fd++){
-            if(p->ofile[fd]){
-                fileclose(p->ofile[fd]);
-                p->ofile[fd] = 0;
-            }
-        }
-        iput(p->cwd);
-        p->cwd = 0;
         p->state = ZOMBIE;
+        join(p->pid);
+        acquire(&ptable.lock);
+
     }
     if(p->parent == proc && p->ismain == 1){
       p->parent = initproc;
@@ -319,7 +313,8 @@ join(int pid)
         return -1;
     }
     struct proc *p;
-    acquire(&ptable.lock);
+    if(!holding(&ptable.lock))
+        acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
         if (p->pid == pid){
             for(;;){

@@ -807,7 +807,7 @@ subdir(void)
   }
   write(fd, "ff", 2);
   close(fd);
-  
+
   if(unlink("dd") >= 0){
     printf(1, "unlink dd (non-empty dir) succeeded!\n");
     exit();
@@ -1216,24 +1216,24 @@ forktest(void)
     if(pid == 0)
       exit();
   }
-  
+
   if(n == 1000){
     printf(1, "fork claimed to work 1000 times!\n");
     exit();
   }
-  
+
   for(; n > 0; n--){
     if(wait() < 0){
       printf(1, "wait stopped early\n");
       exit();
     }
   }
-  
+
   if(wait() != -1){
     printf(1, "wait got too many\n");
     exit();
   }
-  
+
   printf(1, "fork test OK\n");
 }
 
